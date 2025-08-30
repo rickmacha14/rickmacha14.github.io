@@ -1,1 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Planning WebGIS System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #fbbf24;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fbbf24;
+            transform: translateY(-2px);
+        }
+        
+        /* Page Container */
+        .page-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Home Page Styles */
+        .hero-section {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(30, 64, 175, 0.3);
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cta-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        /* Mapping Page Styles */
+        .mapping-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+        
+        .mapping-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .sidebar-content {
+            padding: 1.5rem;
+        }
+        
+        .tool-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tool-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .map-display {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+        
+        /* Analysis Page Styles */
+        .analysis-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .analysis-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .analysis-icon {
+            font-size: 2rem;
+            color: #3b82f6;
+        }
+        
+        .analysis-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        
+        .analysis-content {
+            color: #64748b;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .metric-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e40af;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        /* Reports Page Styles */
+        .reports-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .report-header {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .report-body {
+            padding: 1.5rem;
+        }
+        
+        .report-actions {
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* Contact Page Styles */
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+        
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(30, 64, 175, 0.3);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .contact-item i {
+            font-size: 1.5rem;
+            color: #fbbf24;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8fafc;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e0;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .mapping-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .contact-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo" onclick="showPage('home')">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Event Planning WebGIS</span>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a onclick="showPage('home')" class="active">Home</a></li>
+                    <li><a onclick="showPage('mapping')">Mapping</a></li>
+                    <li><a onclick="showPage('analysis')">Analysis</a></li>
+                    <li><a onclick="showPage('reports')">Reports</a></li>
+                    <li><a onclick="showPage('contact')">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero-section">
+                <h1 class="hero-title">Event Planning WebGIS</h1>
+                <p class="hero-subtitle">
+                    Professional spatial analysis and mapping solutions for successful event planning and management
+                </p>
+                <div class="cta-buttons">
+                    <button class="cta-btn" onclick="showPage('mapping')">
+                        <i class="fas fa-map"></i> Start Mapping
+                    </button>
+                    <button class="cta-btn" onclick="showPage('analysis')">
+                        <i class="fas fa-chart-line"></i> View Analytics
+                    </button>
+                    <button class="cta-btn" onclick="showPage('reports')">
+                        <i class="fas fa-file-alt"></i> Generate Reports
+                    </button>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Routing</h3>
+                    <p class="feature-description">
+                        Advanced routing algorithms with real-time traffic analysis, coordinate input support, and optimized pathfinding for event logistics.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <h3 class="feature-title">Weather Integration</h3>
+                    <p class="feature-description">
+                        Comprehensive weather forecasting with location-based climate data, helping you plan events with confidence.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-recycle"></i>
+                    </div>
+                    <h3 class="feature-title">Waste Management</h3>
+                    <p class="feature-description">
+                        Intelligent waste collection planning, disposal site optimization, and environmental impact analysis.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <h3 class="feature-title">Precision Location</h3>
+                    <p class="feature-description">
+                        High-accuracy GPS positioning with coordinate system support and detailed location analysis capabilities.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">
+                        Comprehensive spatial analysis tools with real-time data processing and interactive visualization.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Mobile Responsive</h3>
+                    <p class="feature-description">
+                        Fully responsive design that works seamlessly across all devices and screen sizes.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapping Page -->
+        <div id="mapping" class="page">
+            <div class="mapping-layout">
+                <div class="mapping-sidebar">
+                    <div class="sidebar-header">
+                        <h3>GIS Analysis Tools</h3>
+                        <p>Professional spatial analysis</p>
+                    </div>
+                    
+                    <div class="sidebar-content">
+                        <!-- Routing Section -->
+                        <div class="tool-section">
+                            <div class="tool-title">
+                                <i class="fas fa-route"></i>
+                                Routing & Navigation
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Starting Point</label>
+                                <input type="text" id="startPoint" placeholder="Enter place name or coordinates (lat, lng)">
+                                <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">
+                                    Examples: "Central Park" or "40.7829, -73.9654"
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Destination</label>
+                                <input type="text" id="destination" placeholder="Enter place name or coordinates (lat, lng)">
+                                <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">
+                                    Examples: "Times Square" or "40.7580, -73.9855"
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-success" onclick="calculateRoute()" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-directions"></i>
+                                Calculate Route
+                            </button>
+                            
+                            <button class="btn btn-secondary" onclick="showTrafficInfo()" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-traffic-light"></i>
+                                Traffic Conditions
+                            </button>
+                        </div>
+
+                        <!-- Location Tools -->
+                        <div class="tool-section">
+                            <div class="tool-title">
+                                <i class="fas fa-crosshairs"></i>
+                                Location Tools
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="showMyLocation()" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-location-arrow"></i>
+                                Find My Location
+                            </button>
+                            
+                            <button class="btn btn-secondary" onclick="enableInteractiveMode('explore')" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-search"></i>
+                                Explore Mode
+                            </button>
+                            
+                            <button class="btn btn-warning" onclick="clearTempMarkers()" style="width: 100%;">
+                                <i class="fas fa-eraser"></i>
+                                Clear Markers
+                            </button>
+                        </div>
+
+                        <!-- Weather Section -->
+                        <div class="tool-section">
+                            <div class="tool-title">
+                                <i class="fas fa-cloud-sun"></i>
+                                Weather Analysis
+                            </div>
+                            
+                            <button class="btn btn-warning" onclick="getWeatherForecast()" style="width: 100%; margin-bottom: 0.5rem;">
+                                <i class="fas fa-eye"></i>
+                                Weather Forecast
+                            </button>
+                            
+                            <button class="btn btn-secondary" onclick="enableInteractiveMode('weather')" style="width: 100%;">
+                                <i class="fas fa-cloud"></i>
+                                Weather Points
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-container">
+                    <div class="map-display" id="mapDisplay"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Page -->
+        <div id="analysis" class="page">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h1 style="color: #1e40af; font-size: 2.5rem; margin-bottom: 1rem;">Spatial Analysis Dashboard</h1>
+                <p style="color: #64748b; font-size: 1.1rem;">Comprehensive analytics and insights for event planning</p>
+            </div>
+
+            <div class="analysis-dashboard">
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Route Optimization</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Advanced routing algorithms with real-time traffic analysis</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">127</div>
+                                <div class="metric-label">Routes Calculated</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">23%</div>
+                                <div class="metric-label">Time Saved</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="runRouteAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Run Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Weather Patterns</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Climate data analysis and weather forecasting</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">82°F</div>
+                                <div class="metric-label">Current Temp</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">65%</div>
+                                <div class="metric-label">Humidity</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-warning" onclick="runWeatherAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Analyze Weather
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Crowd Analysis</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Population density and crowd flow analysis</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">2,450</div>
+                                <div class="metric-label">Expected Attendees</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">8.7/10</div>
+                                <div class="metric-label">Safety Rating</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="runCrowdAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Analyze Crowds
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Waste Management</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Waste collection optimization and environmental impact</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">15</div>
+                                <div class="metric-label">Collection Points</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">40%</div>
+                                <div class="metric-label">Impact Reduction</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="runWasteAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Optimize Waste
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Safety Assessment</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Emergency services and safety infrastructure analysis</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">12</div>
+                                <div class="metric-label">Emergency Exits</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">3 min</div>
+                                <div class="metric-label">Response Time</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="runSafetyAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Safety Check
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="fas fa-parking"></i>
+                        </div>
+                        <div>
+                            <h3 class="analysis-title">Infrastructure</h3>
+                        </div>
+                    </div>
+                    <div class="analysis-content">
+                        <p>Parking, transportation, and facility analysis</p>
+                        <div class="metric-grid">
+                            <div class="metric-item">
+                                <div class="metric-value">450</div>
+                                <div class="metric-label">Parking Spaces</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">5</div>
+                                <div class="metric-label">Transit Lines</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="runInfrastructureAnalysis()" style="margin-top: 1rem;">
+                            <i class="fas fa-play"></i> Check Infrastructure
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="reports" class="page">
+            <div class="reports-header">
+                <h1 style="color: #1e40af; font-size: 2.5rem; margin-bottom: 1rem;">
+                    <i class="fas fa-file-alt"></i> Analysis Reports
+                </h1>
+                <p style="color: #64748b; font-size: 1.1rem;">
+                    Generate comprehensive reports for your event planning analysis
+                </p>
+            </div>
+
+            <div class="reports-grid">
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-route"></i> Route Analysis Report</h3>
+                        <p>Comprehensive routing and navigation analysis</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Today, 2:30 PM</p>
+                        <p><strong>Routes Analyzed:</strong> 127</p>
+                        <p><strong>Optimization Level:</strong> 94%</p>
+                        <p><strong>Time Savings:</strong> 23% average</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">✓ Complete</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('route')">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewReport('route')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-cloud-sun"></i> Weather Impact Report</h3>
+                        <p>Climate analysis and weather forecasting</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Today, 1:15 PM</p>
+                        <p><strong>Forecast Period:</strong> 7 days</p>
+                        <p><strong>Weather Zones:</strong> 8 analyzed</p>
+                        <p><strong>Risk Level:</strong> Low</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">✓ Complete</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('weather')">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewReport('weather')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-users"></i> Crowd Management Report</h3>
+                        <p>Attendance and crowd flow analysis</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Yesterday, 4:45 PM</p>
+                        <p><strong>Expected Attendees:</strong> 2,450</p>
+                        <p><strong>Capacity Utilization:</strong> 78%</p>
+                        <p><strong>Safety Rating:</strong> 8.7/10</p>
+                        <p><strong>Status:</strong> <span style="color: #f59e0b;">⏳ Updating</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('crowd')">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewReport('crowd')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-recycle"></i> Waste Management Report</h3>
+                        <p>Environmental impact and waste optimization</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Today, 11:20 AM</p>
+                        <p><strong>Collection Points:</strong> 15</p>
+                        <p><strong>Waste Reduction:</strong> 40%</p>
+                        <p><strong>Cost Savings:</strong> $2,340</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">✓ Complete</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('waste')">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewReport('waste')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-shield-alt"></i> Safety Assessment Report</h3>
+                        <p>Emergency preparedness and safety analysis</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Today, 9:30 AM</p>
+                        <p><strong>Emergency Exits:</strong> 12</p>
+                        <p><strong>Response Time:</strong> 3 minutes</p>
+                        <p><strong>Compliance Score:</strong> 96%</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">✓ Complete</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-primary" onclick="generateReport('safety')">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewReport('safety')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3><i class="fas fa-chart-line"></i> Comprehensive Analysis</h3>
+                        <p>Complete event planning overview</p>
+                    </div>
+                    <div class="report-body">
+                        <p><strong>Last Generated:</strong> Today, 3:00 PM</p>
+                        <p><strong>Analysis Modules:</strong> All 6</p>
+                        <p><strong>Data Points:</strong> 1,247</p>
+                        <p><strong>Overall Score:</strong> 92/100</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">✓ Complete</span></p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-success" onclick="generateReport('comprehensive')" style="width: 100%;">
+                            <i class="fas fa-download"></i> Download Master Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contact" class="page">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h1 style="color: #1e40af; font-size: 2.5rem; margin-bottom: 1rem;">
+                    <i class="fas fa-envelope"></i> Contact Us
+                </h1>
+                <p style="color: #64748b; font-size: 1.1rem;">
+                    Get in touch with our GIS experts for support and consultation
+                </p>
+            </div>
+
+            <div class="contact-layout">
+                <div class="contact-form">
+                    <h2 style="color: #1e40af; margin-bottom: 1.5rem;">Send us a Message</h2>
+                    
+                    <form onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="contactName">Full Name *</label>
+                            <input type="text" id="contactName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address *</label>
+                            <input type="email" id="contactEmail" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactPhone">Phone Number</label>
+                            <input type="tel" id="contactPhone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactSubject">Subject *</label>
+                            <select id="contactSubject" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="consultation">GIS Consultation</option>
+                                <option value="partnership">Partnership</option>
+                                <option value="training">Training Request</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactMessage">Message *</label>
+                            <textarea id="contactMessage" rows="5" required placeholder="Please describe your inquiry or how we can help you..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+
+                <div class="contact-info">
+                    <h2 style="margin-bottom: 2rem;">Get in Touch</h2>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <strong>Phone</strong><br>
+                            +255 699 244 700
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <strong>Email</strong><br>
+                            erickmacha14@gmail.com
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>Location</strong><br>
+                            Professional GIS Services<br>
+                            Available Worldwide
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Business Hours</strong><br>
+                            Monday - Friday: 8:00 AM - 6:00 PM<br>
+                            Saturday: 9:00 AM - 4:00 PM
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <i class="fas fa-globe"></i>
+                        <div>
+                            <strong>Services</strong><br>
+                            • GIS Analysis & Mapping<br>
+                            • Event Planning Consultation<br>
+                            • Spatial Data Processing<br>
+                            • Custom WebGIS Solutions
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <h3 style="margin-bottom: 1rem;">Follow Us</h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: none;">
+                                <i class="fab fa-linkedin"></i>
+                            </button>
+                            <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: none;">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: none;">
+                                <i class="fab fa-github"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2024 Event Planning WebGIS System. Professional spatial analysis for event management.</p>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Operation completed successfully!</span>
+    </div>
+
+    <script>
+        let map;
+        let currentPage = 'home';
+        let markers = [];
+        let tempMarkers = [];
+        let routePolylines = [];
+        let interactiveMode = 'explore';
+        let routePoints = [];
+
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentPage = pageId;
+            
+            // Initialize map if mapping page is shown
+            if (pageId === 'mapping' && !map) {
+                setTimeout(initializeMap, 100);
+            }
+            
+            showNotification(`Switched to ${pageId.charAt(0).toUpperCase() + pageId.slice(1)} page`);
+        }
+
+        // Initialize Map
+        function initializeMap() {
+            if (map) return;
+            
+            map = L.map('mapDisplay').setView([40.7128, -74.0060], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            map.on('click', handleMapClick);
+            
+            showNotification('Interactive map initialized successfully!');
+        }
+
+        // Map Functions
+        function handleMapClick(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            switch(interactiveMode) {
+                case 'route':
+                    addRoutePoint(lat, lng);
+                    break;
+                case 'weather':
+                    showWeatherAtLocation(lat, lng);
+                    break;
+                case 'explore':
+                default:
+                    showLocationInfo(lat, lng);
+            }
+        }
+
+        function showMyLocation() {
+            if (!navigator.geolocation) {
+                showNotification('Geolocation not supported by this browser', 'error');
+                return;
+            }
+
+            showNotification('🎯 Getting your location...', 'info');
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    const userIcon = L.divIcon({
+                        html: '<div style="background: #3b82f6; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><i class="fas fa-crosshairs"></i></div>',
+                        className: 'user-location-icon',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+
+                    const userMarker = L.marker([lat, lng], {icon: userIcon}).addTo(map)
+                        .bindPopup(`<div style="text-align: center;"><b>Your Location</b><br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}<br>Accuracy: ±${Math.round(accuracy)}m</div>`);
+
+                    tempMarkers.push(userMarker);
+                    map.setView([lat, lng], 16);
+                    
+                    showNotification(`📍 Location found! Accuracy: ±${Math.round(accuracy)}m`);
+                },
+                function(error) {
+                    showNotification('Unable to get your location', 'error');
+                }
+            );
+        }
+
+        function enableInteractiveMode(mode) {
+            interactiveMode = mode;
+            clearTempMarkers();
+            
+            const modeMessages = {
+                'explore': 'Explore mode: Click anywhere to get location info',
+                'route': 'Route mode: Click to set route points',
+                'weather': 'Weather mode: Click to get weather info'
+            };
+            
+            showNotification(modeMessages[mode] || 'Interactive mode enabled');
+        }
+
+        function clearTempMarkers() {
+            tempMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            tempMarkers = [];
+            routePoints = [];
+            
+            routePolylines.forEach(polyline => {
+                map.removeLayer(polyline);
+            });
+            routePolylines = [];
+            
+            showNotification('Markers cleared');
+        }
+
+        function addRoutePoint(lat, lng) {
+            routePoints.push([lat, lng]);
+            
+            const markerColor = routePoints.length === 1 ? '#10b981' : '#ef4444';
+            const markerLabel = routePoints.length === 1 ? 'S' : 'E';
+            
+            const routeIcon = L.divIcon({
+                html: `<div style="background: ${markerColor}; color: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">${markerLabel}</div>`,
+                className: 'route-marker',
+                iconSize: [25, 25],
+                iconAnchor: [12, 12]
+            });
+            
+            const marker = L.marker([lat, lng], {icon: routeIcon}).addTo(map)
+                .bindPopup(`<b>${routePoints.length === 1 ? 'Start' : 'End'} Point</b><br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}`);
+            
+            tempMarkers.push(marker);
+            
+            if (routePoints.length === 2) {
+                const routeLine = L.polyline(routePoints, {
+                    color: '#3b82f6',
+                    weight: 4,
+                    opacity: 0.8
+                }).addTo(map);
+                
+                routePolylines.push(routeLine);
+                
+                const distance = calculateDistance(routePoints[0], routePoints[1]);
+                showNotification(`Route created! Distance: ${distance.toFixed(2)} km`);
+            }
+        }
+
+        function showLocationInfo(lat, lng) {
+            const infoIcon = L.divIcon({
+                html: '<div style="background: #3b82f6; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">📍</div>',
+                className: 'info-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            const marker = L.marker([lat, lng], {icon: infoIcon}).addTo(map)
+                .bindPopup(`<b>Location Info</b><br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}<br>Click for analysis`);
+            
+            tempMarkers.push(marker);
+            showNotification('Location marker added');
+        }
+
+        function showWeatherAtLocation(lat, lng) {
+            const temp = Math.floor(Math.random() * 20) + 70; // 70-90°F
+            const conditions = ['☀️ Sunny', '⛅ Partly Cloudy', '☁️ Cloudy'];
+            const condition = conditions[Math.floor(Math.random() * conditions.length)];
+            
+            const weatherIcon = L.divIcon({
+                html: '<div style="background: #f59e0b; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🌤️</div>',
+                className: 'weather-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            const marker = L.marker([lat, lng], {icon: weatherIcon}).addTo(map)
+                .bindPopup(`<b>Weather Info</b><br>${condition}<br>Temperature: ${temp}°F<br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}`);
+            
+            tempMarkers.push(marker);
+            showNotification(`Weather: ${temp}°F, ${condition}`);
+        }
+
+        function calculateDistance(point1, point2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (point2[0] - point1[0]) * Math.PI / 180;
+            const dLon = (point2[1] - point1[1]) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(point1[0] * Math.PI / 180) * Math.cos(point2[0] * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Routing Functions
+        function calculateRoute() {
+            const startPoint = document.getElementById('startPoint').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            
+            if (!startPoint || !destination) {
+                showNotification('Please enter both starting point and destination', 'error');
+                return;
+            }
+            
+            showNotification('🗺️ Calculating optimal route...', 'info');
+            
+            // Simulate route calculation
+            setTimeout(() => {
+                showNotification('✅ Route calculated successfully!');
+            }, 2000);
+        }
+
+        function showTrafficInfo() {
+            showNotification('📊 Loading traffic information...', 'info');
+            
+            setTimeout(() => {
+                showNotification('Traffic data updated - Moderate congestion detected');
+            }, 1500);
+        }
+
+        function getWeatherForecast() {
+            showNotification('🌤️ Getting weather forecast...', 'info');
+            
+            setTimeout(() => {
+                showNotification('Weather forecast loaded - Clear skies expected');
+            }, 1500);
+        }
+
+        // Analysis Functions
+        function runRouteAnalysis() {
+            showNotification('🔄 Running route optimization analysis...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Route analysis complete - 23% time savings identified');
+            }, 3000);
+        }
+
+        function runWeatherAnalysis() {
+            showNotification('🌦️ Analyzing weather patterns...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Weather analysis complete - Favorable conditions detected');
+            }, 2500);
+        }
+
+        function runCrowdAnalysis() {
+            showNotification('👥 Analyzing crowd patterns...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Crowd analysis complete - Optimal capacity utilization');
+            }, 3000);
+        }
+
+        function runWasteAnalysis() {
+            showNotification('♻️ Optimizing waste management...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Waste optimization complete - 40% efficiency improvement');
+            }, 2500);
+        }
+
+        function runSafetyAnalysis() {
+            showNotification('🛡️ Conducting safety assessment...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Safety analysis complete - All systems operational');
+            }, 2000);
+        }
+
+        function runInfrastructureAnalysis() {
+            showNotification('🏗️ Analyzing infrastructure...', 'info');
+            
+            setTimeout(() => {
+                showNotification('✅ Infrastructure analysis complete - Adequate capacity confirmed');
+            }, 2500);
+        }
+
+        // Report Functions
+        function generateReport(type) {
+            const reportTypes = {
+                'route': 'Route Analysis Report',
+                'weather': 'Weather Impact Report',
+                'crowd': 'Crowd Management Report',
+                'waste': 'Waste Management Report',
+                'safety': 'Safety Assessment Report',
+                'comprehensive': 'Comprehensive Analysis Report'
+            };
+            
+            showNotification(`📄 Generating ${reportTypes[type]}...`, 'info');
+            
+            setTimeout(() => {
+                showNotification(`✅ ${reportTypes[type]} generated and downloaded!`);
+            }, 2000);
+        }
+
+        function viewReport(type) {
+            showNotification(`👁️ Opening ${type} report details...`, 'info');
+            
+            setTimeout(() => {
+                showNotification(`Report viewer opened for ${type} analysis`);
+            }, 1000);
+        }
+
+        // Contact Form
+        function submitContactForm(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const subject = document.getElementById('contactSubject').value;
+            const message = document.getElementById('contactMessage').value;
+            
+            if (!name || !email || !subject || !message) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            showNotification('📧 Sending your message...', 'info');
+            
+            // Simulate form submission
+            setTimeout(() => {
+                showNotification('✅ Message sent successfully! We\'ll get back to you soon.');
+                event.target.reset();
+            }, 2000);
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('🚀 Event Planning WebGIS System loaded successfully!');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9775104797897930',t:'MTc1NjU2NTAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
 
