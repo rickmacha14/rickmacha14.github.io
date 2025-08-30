@@ -5,204 +5,190 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Erick Jimmy Macha - CV</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
+      display: flex;
       background: #f4f6f9;
       color: #333;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark {
-      background: #121212;
-      color: #eee;
     }
     /* Sidebar */
     .sidebar {
-      width: 260px;
+      width: 280px;
       background: #2c3e50;
       color: #fff;
-      padding: 20px;
+      padding: 30px 20px;
       position: fixed;
       height: 100%;
       text-align: center;
-      transition: left 0.3s;
     }
     .sidebar img {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
-      border: 3px solid #fff;
+      border: 4px solid #fff;
       object-fit: cover;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
     .sidebar h1 {
-      font-size: 1.2em;
-      margin-bottom: 8px;
+      font-size: 1.4em;
+      margin-bottom: 10px;
     }
-    .sidebar p { font-size: 0.85em; margin: 4px 0; }
-    .sidebar a { color: #fff; text-decoration: none; }
-    .sidebar hr { border: 0.5px solid #555; margin: 10px 0; }
-    .social-links a { margin: 0 6px; font-size: 1.2em; }
+    .sidebar p {
+      font-size: 0.9em;
+      margin: 6px 0;
+    }
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .sidebar hr {
+      border: 0.5px solid #555;
+      margin: 15px 0;
+    }
+    /* Social links */
+    .social-links {
+      margin-top: 10px;
+    }
+    .social-links a {
+      display: inline-block;
+      margin: 0 8px;
+      font-size: 1.3em;
+      color: #fff;
+      transition: color 0.3s;
+    }
+    .social-links a:hover {
+      color: #1abc9c;
+    }
+    /* Download button */
     .download-btn {
-      display: inline-block; margin-top: 10px; padding: 8px 15px;
-      background: #1abc9c; color: #fff; border-radius: 5px;
-      font-size: 0.9em; text-decoration: none;
+      display: inline-block;
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: #1abc9c;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.9em;
+      text-decoration: none;
+      transition: background 0.3s;
     }
-    .download-btn:hover { background: #16a085; }
-    /* Dark mode styles */
-    body.dark .sidebar { background: #1c1c1c; }
-    body.dark section { background: #1f1f1f; color: #eee; }
-    /* Main */
-    .main { margin-left: 260px; padding: 20px; transition: margin 0.3s; }
+    .download-btn:hover {
+      background: #16a085;
+    }
+    /* Main content */
+    .main {
+      margin-left: 280px;
+      padding: 30px;
+      flex: 1;
+    }
     section {
-      background: #fff; padding: 20px; margin-bottom: 20px;
-      border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: background 0.3s, color 0.3s;
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-    body.dark h2 { color: #1abc9c; border-color: #333; }
-    /* Timeline */
-    .timeline { border-left: 2px solid #1abc9c; padding-left: 15px; }
-    .timeline p { margin: 5px 0; }
-    .timeline .job { margin-bottom: 15px; }
-    /* Skills */
-    .skill { margin: 10px 0; }
-    .skill-name { font-size: 0.9em; }
-    .skill-bar {
-      background: #eee; height: 8px; border-radius: 4px;
-      overflow: hidden;
+    h2 {
+      color: #2c3e50;
+      margin-top: 0;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
     }
-    .skill-level {
-      height: 8px; background: #1abc9c;
+    ul {
+      padding-left: 20px;
     }
-    /* Contact form */
-    form input, form textarea {
-      width: 100%; padding: 8px; margin: 8px 0;
-      border: 1px solid #ccc; border-radius: 5px;
-    }
-    form button {
-      background: #1abc9c; color: #fff; border: none;
-      padding: 10px 15px; border-radius: 5px; cursor: pointer;
-    }
-    form button:hover { background: #16a085; }
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { width: 200px; left: -200px; }
-      .sidebar.open { left: 0; }
-      .main { margin-left: 0; padding: 15px; }
-      .toggle-btn {
-        position: fixed; top: 15px; left: 15px;
-        background: #1abc9c; color: #fff; border: none;
-        padding: 10px; border-radius: 5px; cursor: pointer;
-        z-index: 1000;
-      }
-    }
-    .theme-toggle {
-      margin-top: 10px; cursor: pointer; font-size: 0.9em;
-      display: inline-block; padding: 5px 10px;
-      border: 1px solid #fff; border-radius: 5px;
+    li {
+      margin-bottom: 6px;
     }
   </style>
 </head>
 <body>
-  <!-- Mobile toggle -->
-  <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
-
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar">
     <img src="profile.jpg" alt="Profile Photo">
     <h1>Erick Jimmy Macha</h1>
     <p>📍 Arusha, Tanzania</p>
     <p>📞 +255 699 244 700 / +255 765 135 936</p>
     <p>✉️ <a href="mailto:erickmacha14@gmail.com">erickmacha14@gmail.com</a></p>
-
+    
+    <!-- Social links -->
     <div class="social-links">
       <a href="https://wa.me/255699244700" target="_blank"><i class="fab fa-whatsapp"></i></a>
       <a href="https://www.instagram.com/rick14_08/" target="_blank"><i class="fab fa-instagram"></i></a>
     </div>
 
+    <!-- Download CV button -->
     <a href="ERICK-MACHA-CV[1].pdf" class="download-btn" target="_blank" download>
       <i class="fa fa-download"></i> Download CV
     </a>
 
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 Dark/Light</div>
     <hr>
     <p><strong>DOB:</strong> 14 Aug 2001</p>
     <p><strong>Nationality:</strong> Tanzanian</p>
     <p><strong>Languages:</strong> Kiswahili, English</p>
   </div>
 
-  <!-- Main -->
+  <!-- Main content -->
   <div class="main">
+    <!-- Download button at the top -->
     <a href="ERICK-MACHA-CV[1].pdf" class="download-btn" target="_blank" download>
       <i class="fa fa-download"></i> Download CV
     </a>
 
-    <section id="objective">
+    <section>
       <h2>Career Objective</h2>
-      <p>Highly motivated and hardworking person with a strong foundation in GIS and Remote Sensing. Eager to apply knowledge to support urban planning, environmental monitoring, and infrastructure development.</p>
+      <p>Highly motivated and hardworking person with a strong foundation and understanding in Geographic Information Systems (GIS) and spatial data management. Eager to apply academic knowledge to support urban planning, environmental monitoring, and infrastructure development.</p>
     </section>
 
-    <section id="education">
+    <section>
       <h2>Education</h2>
       <ul>
-        <li><strong>BSc in GIS & Remote Sensing</strong> — Ardhi University (2022 - 2025)</li>
-        <li><strong>ACSEE</strong> — Kilangalanga Secondary School (2020 - 2022)</li>
-        <li><strong>CSEE</strong> — Edmund Rice Sinon Secondary School (2016 - 2019)</li>
+        <li><strong>BSc in Geographical Information Systems & Remote Sensing</strong> — Ardhi University (2022 - 2025)</li>
+        <li><strong>Advanced Certificate of Secondary Education</strong> — Kilangalanga Secondary School (2020 - 2022)</li>
+        <li><strong>Certificate of Secondary Education</strong> — Edmund Rice Sinon Secondary School (2016 - 2019)</li>
       </ul>
     </section>
 
-    <section id="skills">
+    <section>
       <h2>Skills</h2>
-      <div class="skill"><span class="skill-name">ArcMap / QGIS</span>
-        <div class="skill-bar"><div class="skill-level" style="width:90%"></div></div></div>
-      <div class="skill"><span class="skill-name">Remote Sensing (ENVI, SNAP, Erdas)</span>
-        <div class="skill-bar"><div class="skill-level" style="width:85%"></div></div></div>
-      <div class="skill"><span class="skill-name">Google Earth Engine / R Studio</span>
-        <div class="skill-bar"><div class="skill-level" style="width:80%"></div></div></div>
-      <div class="skill"><span class="skill-name">Communication & Teamwork</span>
-        <div class="skill-bar"><div class="skill-level" style="width:75%"></div></div></div>
+      <ul>
+        <li>Attention to detail & teamwork</li>
+        <li>Networking, mobilization & communication</li>
+        <li>Organizational & multitasking skills</li>
+        <li>GIS Software: ArcMap, QGIS, ENVI, SNAP, Google Earth Engine, R Studio, Erdas Imagine, Agisoft Metashape</li>
+        <li>Microsoft Office: Word, Excel, PowerPoint, Access</li>
+      </ul>
     </section>
 
-    <section id="experience">
+    <section>
       <h2>Work Experience</h2>
-      <div class="timeline">
-        <div class="job">
-          <h4>Tanzania National Park Authority (TANAPA)</h4>
-          <p><em>Aug 2024 — Arusha</em></p>
-          <p>Analyzed Kilimanjaro NP satellite imagery, created GIS maps, updated investment Web GIS, processed drone images.</p>
-        </div>
-        <div class="job">
-          <h4>Kibaha Project Municipal Council</h4>
-          <p><em>Jun 2023</em></p>
-          <p>Integrated GIS, remote sensing & photogrammetry; produced user accessibility maps.</p>
-        </div>
-        <div class="job">
-          <h4>Ilala Municipal Council, Dar es Salaam</h4>
-          <p><em>Aug 2023</em></p>
-          <p>Updated maps, beacon erection, digitizing land amendment maps, boundary restoration.</p>
-        </div>
-      </div>
+      <p><strong>Tanzania National Park Authority (TANAPA), Arusha</strong> — Aug 2024</p>
+      <ul>
+        <li>Analyzed Kilimanjaro NP satellite imagery for land use/land cover maps.</li>
+        <li>Prepared investment area coordinate points.</li>
+        <li>Designed & updated TANAPA Investment Web GIS platform.</li>
+        <li>Processed drone images using Agisoft Metashape.</li>
+      </ul>
+
+      <p><strong>Kibaha Project Municipal Council</strong> — Jun 2023</p>
+      <ul>
+        <li>Integrated GIS, remote sensing & photogrammetry techniques.</li>
+        <li>Produced user accessibility maps.</li>
+      </ul>
+
+      <p><strong>Ilala Municipal Council, Dar es Salaam</strong> — Aug 2023</p>
+      <ul>
+        <li>Updated & created new ward maps.</li>
+        <li>Beacon erection for land plots.</li>
+        <li>Georeferenced & digitized land amendment maps.</li>
+        <li>Boundary restoration of plots.</li>
+      </ul>
     </section>
 
-    <section id="portfolio">
-      <h2>Portfolio</h2>
-      <p>Sample GIS & Remote Sensing projects will be showcased here (maps, analysis, dashboards).</p>
-    </section>
-
-    <section id="contact">
-      <h2>Contact Me</h2>
-      <form action="mailto:erickmacha14@gmail.com" method="post" enctype="text/plain">
-        <input type="text" name="name" placeholder="Your Name" required>
-        <input type="email" name="email" placeholder="Your Email" required>
-        <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
-    </section>
-
-    <section id="referees">
+    <section>
       <h2>Referees</h2>
       <ul>
         <li><strong>Dr. Beatrice C. Tarimo</strong> — Lecturer, Ardhi University | 📞 +255 754 766 575 | ✉️ betarimo@gmail.com</li>
@@ -211,15 +197,6 @@
       </ul>
     </section>
   </div>
-
-  <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
-    function toggleTheme() {
-      document.body.classList.toggle('dark');
-    }
-  </script>
 </body>
 </html>
 
